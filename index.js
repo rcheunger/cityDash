@@ -4,6 +4,7 @@ const c = canvas.getContext('2d')
 canvas.width = innerWidth
 canvas.height = innerHeight
 
+// gravity strength
 const gravity = 0.5
 
 class Player {
@@ -25,6 +26,7 @@ class Player {
         c.fillRect(this.position.x, this.position.y, this.width, this.height)
     }
 
+    // gravity properties
     update() {
         this.draw()
         this.position.y += this.velocity.y
@@ -36,7 +38,25 @@ class Player {
     }
 }
 
+class Platform {
+    constructor() {
+         this.position = {
+             x: 200,
+             y: 100
+         }
+         this.width = 200
+         this.height = 20
+    }
+
+    draw() {
+        c.fillStyle = 'blue'
+        c.fillRect(this.position.x, this.position.y, this.width, this.height)
+    }
+}
+
 const player = new Player()
+const platform = new Platform()
+
 const keys = {
     right: {
         pressed: false
@@ -50,16 +70,37 @@ function animate() {
     requestAnimationFrame(animate)
     c.clearRect(0, 0, canvas.width, canvas.height)
     player.update()
+    platform.draw()
 
-    if (keys.right.pressed) {
+    //left and right movement
+    if (keys.right.pressed && player.position.x < 400) {
         player.velocity.x = 5
-    } else if (keys.left.pressed) {
+    } else if (keys.left.pressed && player.position.x > 100) {
         player.velocity.x = -5
-    } else player.velocity.x = 0
+    } else {
+        player.velocity.x = 0
+    
+        if (keys.right.pressed) {
+            platform.position.x -= 5
+        } else if (keys.left.pressed) {
+            platform.position.x += 5
+        }
+    }
+
+    // platform collision detection
+    if (player.position.y + player.height <= 
+            platform.position.y && 
+        player.position.y + player.height + player.velocity.y >= 
+            platform.position.y && 
+        player.position.x + player.width >= 
+            platform.position.x && player.position.x <= platform.position.x + platform.width) {
+        player.velocity.y = 0
+    }
 }
 
 animate()
 
+// down key listener (asdw)
 addEventListener('keydown', ({ keyCode }) => {
     switch (keyCode) {
         case 65:
@@ -83,6 +124,7 @@ addEventListener('keydown', ({ keyCode }) => {
     }
 })
 
+// up key listener (asdw)
 addEventListener('keyup', ({ keyCode }) => {
     switch (keyCode) {
         case 65:
